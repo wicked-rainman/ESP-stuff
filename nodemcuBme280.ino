@@ -1,3 +1,7 @@
+// NodeMCU (Amica) 
+// Broadcasts UDP packets containing the values read from a BME280 connected on I2C
+//
+
 #include <ESP8266WiFi.h>
 #include <WiFiUdp.h>
 #include <Wire.h>
