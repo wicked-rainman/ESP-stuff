@@ -1,5 +1,5 @@
 //Heltec board with built in oled display
-//UDP client to diplay weather values off a remote BME280 (Temp, pressure and humidity)
+//UDP client to diplay weather values sent from a remote esp32 with attached BME280 (Temp, pressure and humidity)
 
 #include "Arduino.h"
 #include "heltec.h"
