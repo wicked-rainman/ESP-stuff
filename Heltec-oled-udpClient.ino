@@ -1,5 +1,5 @@
 //Heltec board with built in oled display
-//UDP client to diplay weather values off a remote BME280
+//UDP client to diplay weather values off a remote BME280 (Temp, pressure and humidity)
 
 #include "Arduino.h"
 #include "heltec.h"
@@ -7,6 +7,8 @@
 #include <WiFiUdp.h>
 const char ssid[]="ssid";
 const char pass[]="pass";
+WiFiUDP udp;
+
 void setup() {
   Heltec.begin(true /*DisplayEnable Enable*/, false /*LoRa Disable*/, true /*Serial Enable*/);
   Heltec.display->flipScreenVertically();
@@ -34,59 +36,49 @@ void loop() {
   char outTemp[10];
   char outHumi[10];
   char RelPress[10];
-  char avgwind[10];
-  char dailyrainin[10];
-  int percentFill;
-  float pres;
-  float baro;
-  float temp;
-  float mmrain;
-  int countPos, pos, nextpos;
-  char mmRain[10];
+  char *weatherptr;
+  int pos;
   int packetSize = 0;
   int payloadSize = 0;
-  char tempCentigrade[12];
-  char pressure[12];
   packetSize = udp.parsePacket();
   if (packetSize) {
     payloadSize = udp.read(weatherChars, 255);
     if (payloadSize > 0) {
       weatherChars[payloadSize] = 0;
-
+      weatherptr=weatherChars;
+      
       //Extract pressure
       RelPress[0] = '\0';
-      pos = strpos(",", weatherChars);
-      strncpy(RelPress, weatherChars, pos);
-      RelPress[pos] = 0;
-      strcpy(weatherChars, &weatherChars[pos + 1]);
-
+      pos = strpos(",", weatherptr);
+      strncpy(RelPress, weatherptr, pos);
+      RelPress[pos]='\0';
+      strcat(RelPress,"mb");
+      weatherptr += (pos+1);
 
       //Extract Humidity
       outHumi[0] = '\0';
-      pos = strpos(",", weatherChars);
-      strncpy(outHumi, weatherChars, pos);
+      pos = strpos(",", weatherptr);
+      strncpy(outHumi, weatherptr, pos);
       outHumi[pos] = 0;
-      strcpy(weatherChars, &weatherChars[pos + 1]);
       strcat(outHumi, "%");
-
-
+      weatherptr += (pos+1);
 
       //Extract temp
       outTemp[0] = '\0';
       //pos=strpos(",",weatherChars);
-      strcpy(outTemp, weatherChars);
+      strcpy(outTemp, weatherptr);
       outTemp[strlen(outTemp) - 1] = '\0';
-      strcat(outTemp, "C");
+      strcat(outTemp, "c");
 
       Heltec.display->clear();
       Heltec.display->setTextAlignment(TEXT_ALIGN_LEFT);
-      Heltec.display->setFont(ArialMT_Plain_16);
+      Heltec.display->setFont(ArialMT_Plain_24);
 
-      Heltec.display->drawString(1, 5, outTemp);
-      Heltec.display->drawString(80, 5, outHumi);
+      Heltec.display->drawString(2, 5, outTemp);
+      Heltec.display->drawString(75, 5, outHumi);
       Heltec.display->setFont(ArialMT_Plain_24);
       Heltec.display->setTextAlignment(TEXT_ALIGN_CENTER);
-      Heltec.display->drawString(60, 35, RelPress);
+      Heltec.display->drawString(55, 40, RelPress);
       Heltec.display->display();
 
     }
