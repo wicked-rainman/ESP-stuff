@@ -3,12 +3,10 @@
 // Write these values out to the built in screen
 
 #include <M5StickCPlus.h>
-#include "SHT3X.h"
 #include <Wire.h>
 #include "Adafruit_Sensor.h"
 #include <Adafruit_BMP280.h>
 
-SHT3X sht3x;
 Adafruit_BMP280 bmp;
 bool bmp280_found;
 
@@ -22,11 +20,30 @@ void setup() {
 }
 
 void loop() {
-  if (sht3x.get() == 0) {
-    M5.Lcd.setCursor(0, 20, 4);
-    M5.Lcd.printf("Temp: %2.1f", sht3x.cTemp);
-    M5.Lcd.setCursor(0, 50, 4);
-    M5.Lcd.printf("Humi: %2.0f", sht3x.humidity);
+  unsigned int data[6];
+  float tempC,humidity;
+  int i;
+  //Wire talk to the SHT30 to get temp and humidity
+  Wire.beginTransmission(0x44);
+  Wire.write(0x2C);
+  Wire.write(0x06);
+  if (Wire.endTransmission() == 0) {
+    delay(500);
+    //Read byte data
+    Wire.requestFrom(0x44, 6);
+    for (i = 0; i < 6; i++) {
+      data[i] = Wire.read();
+    };
+    delay(50);
+    if (Wire.available() == 0) {
+      //Got valid data
+      tempC = ((((data[0] * 256.0) + data[1]) * 175) / 65535.0) - 45;
+      humidity = ((((data[3] * 256.0) + data[4]) * 100) / 65535.0);
+      M5.Lcd.setCursor(0, 20, 4);
+      M5.Lcd.printf("Temp: %2.1f", tempC);
+      M5.Lcd.setCursor(0, 50, 4);
+      M5.Lcd.printf("Humi: %2.0f", humidity);
+    }
   }
   else {
     M5.Lcd.setCursor(0, 20, 4);
@@ -45,3 +62,5 @@ void loop() {
   }
   delay(1000);
 }
+
+
