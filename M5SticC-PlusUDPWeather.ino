@@ -1,6 +1,6 @@
 #include <M5StickCPlus.h>
 
-//UDP Weather client for M5stickc plus
+//UDP Weather client for M5stickc 
 //Displays the content of UDP packets sent from an ESP connected to a BME280
 //
 #include <SPI.h>
@@ -15,19 +15,24 @@
 #include <WiFiType.h>
 #include <WiFiGeneric.h>
 #include <WiFiSTA.h>
+
 int status = WL_IDLE_STATUS;
 WiFiUDP Udp;
-char ssid[10];={............};
-char pass[10]={..............};
+const char* ssid= "?????";
+const char* pass= "?????";
 char packetBuffer[255];
-int client = 0;
+int clientCount = 0;
+const char* ntpServer = "europe.pool.ntp.org";
+const long  gmtOffset_sec = 0;
+const int   daylightOffset_sec = 3600;
+struct tm timeinfo;
 
 void setup() {
   M5.begin();
   M5.Lcd.fillScreen(BLACK);
   M5.Lcd.setCursor(0, 10);
   M5.Lcd.setTextColor(WHITE);
-  M5.Lcd.setTextSize(3);
+  M5.Lcd.setTextSize(2);
   M5.Lcd.setRotation(3);
   M5.Lcd.printf("Connecting ");
 
@@ -36,9 +41,12 @@ void setup() {
     M5.Lcd.printf(".");
     delay(1000);
   }
+//  M5.Lcd.fillScreen(BLACK);
   M5.Lcd.setCursor(1, 50);
   M5.Lcd.print(WiFi.localIP());
   Serial.println(WiFi.localIP());
+  M5.Lcd.setTextSize(3);
+  configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);
   Udp.begin(5679);
 
 }
@@ -48,12 +56,11 @@ void loop() {
   char outTemp[10];
   char outHumi[10];
   char RelPress[10];
-  float pres;
-  float temp;
+  float pres,baro,temp;
   int pos;
+  char mmRain[10];
   int packetSize = 0;
   int payloadSize = 0;
-  char pressure[12];
   char *weatherptr;
   packetSize = Udp.parsePacket();
   if (packetSize) {
@@ -71,7 +78,7 @@ void loop() {
       strncpy(RelPress, weatherptr, pos);
       RelPress[pos] = 0;
       weatherptr += (pos+1);
-      M5.Lcd.setCursor(10, 10);
+      M5.Lcd.setCursor(40, 10);
       pres = strtof(RelPress, NULL);
       if (pres > 1000) M5.Lcd.setTextColor(GREEN);
         else M5.Lcd.setTextColor(ORANGE);
@@ -96,8 +103,14 @@ void loop() {
       else if (temp > 10) M5.Lcd.setTextColor(GREEN);
       else if (temp > 5) M5.Lcd.setTextColor(WHITE);
       else M5.Lcd.setTextColor(BLUE);
-      M5.Lcd.setCursor(10, 90);
+      M5.Lcd.setCursor(110, 50);
       M5.Lcd.print(outTemp);
+      getLocalTime(&timeinfo);
+      
+      //Print current time
+      M5.Lcd.setCursor(40,90);
+      M5.Lcd.setTextColor(WHITE);
+      M5.Lcd.print(&timeinfo, "%H:%M:%S");
     }
   }
 }
