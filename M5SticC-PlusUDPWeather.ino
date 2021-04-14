@@ -41,14 +41,12 @@ void setup() {
     M5.Lcd.printf(".");
     delay(1000);
   }
-//  M5.Lcd.fillScreen(BLACK);
   M5.Lcd.setCursor(1, 50);
   M5.Lcd.print(WiFi.localIP());
   Serial.println(WiFi.localIP());
   M5.Lcd.setTextSize(3);
   configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);
   Udp.begin(5679);
-
 }
 
 void loop() {
@@ -62,6 +60,7 @@ void loop() {
   int packetSize = 0;
   int payloadSize = 0;
   char *weatherptr;
+  
   packetSize = Udp.parsePacket();
   if (packetSize) {
     payloadSize = Udp.read(weatherChars, 255);
