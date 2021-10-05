@@ -107,7 +107,7 @@ void loop() {
       else if(temperature >=20) M5.Lcd.setTextColor(ORANGE);
       else if(temperature >=15) M5.Lcd.setTextColor(YELLOW);
       else if(temperature >=10) M5.Lcd.setTextColor(GREEN);
-      else if(temperature >=5) M5.Lcd.setTextColor(BLUE);
+      else if(temperature >=5) M5.Lcd.setTextColor(WHITE);
       else M5.Lcd.setTextColor(BLUE);
       M5.Lcd.setCursor(10, 110);
       M5.Lcd.printf("%2.1fC",temperature);
