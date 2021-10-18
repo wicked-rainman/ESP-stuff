@@ -5,8 +5,8 @@
 #define UDP_PORT 5680
 WiFiUDP udp;
 IPAddress SendIP(192,168,1,255);
-const char *ssid =  "Virus";
-const char *pass =  "50158980";
+const char *ssid =  "xxxxxx";
+const char *pass =  "zzzzzzz";
 char packet[200];
 HardwareSerial GPSRaw(2);
 char ch;
